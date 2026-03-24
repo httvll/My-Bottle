@@ -12,9 +12,39 @@
   <style>
     * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
     html, body { height:100%; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#e8eef5; }
-    .phone { max-width:430px; margin:0 auto; background:#e8eef5; min-height:100vh; display:flex; flex-direction:column; position:relative; overflow:hidden; }
-    .screen { display:none; flex-direction:column; flex:1; overflow:hidden; }
-    .screen.active { display:flex; }
+    /* 1. Hacemos que el contenedor ocupe todo el ancho en PC */
+  .phone { 
+    width: 100%; 
+    max-width: 100%; 
+    margin: 0 auto; 
+    background: #e8eef5; 
+    min-height: 100vh; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative; 
+  }
+  
+  /* 2. Limitamos el contenido para que no se estire infinito en pantallas grandes */
+  .home-main, .inner-main, .profile-main, .home-profile-section, .home-nav-section {
+    width: 100%;
+    max-width: 800px; /* Ancho ideal para escritorio */
+    margin: 0 auto;
+  }
+  
+  /* 3. Ajuste para que los botones se vean en fila en el portátil */
+  @media (min-width: 768px) {
+    .nav-cards {
+      grid-template-columns: 1fr 1fr 1fr 1fr; /* 4 columnas en PC */
+      gap: 20px;
+    }
+    .summary-row {
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+    .chart-area {
+      height: 250px; /* Gráfico más grande en PC */
+    }
+  }
 
     .welcome-bg { flex:1; background:#185FA5; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 32px; padding-top:calc(env(safe-area-inset-top,0px) + 40px); }
     .welcome-logo { width:90px; height:90px; background:rgba(255,255,255,0.15); border-radius:28px; display:flex; align-items:center; justify-content:center; margin-bottom:24px; border:1.5px solid rgba(255,255,255,0.25); }
