@@ -1,6 +1,6 @@
 {
-  "name": "Mi Botella",
-  "short_name": "Mi Botella",
+  "name": "My Bottle",
+  "short_name": "My Bottle",
   "description": "Registra tu consumo diario de agua",
   "start_url": "/",
   "display": "standalone",
