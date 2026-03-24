@@ -2,7 +2,7 @@
   "name": "My Bottle",
   "short_name": "My Bottle",
   "description": "Registra tu consumo diario de agua",
-  "start_url": "/",
+  "start_url": "https://github.com/httvll/My-Bottle",
   "display": "standalone",
   "background_color": "#185FA5",
   "theme_color": "#185FA5",
