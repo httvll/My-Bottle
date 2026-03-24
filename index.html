@@ -14,14 +14,15 @@
     html, body { height:100%; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#e8eef5; }
     /* 1. Hacemos que el contenedor ocupe todo el ancho en PC */
   .phone { 
-    width: 100%; 
-    max-width: 100%; 
-    margin: 0 auto; 
-    background: #e8eef5; 
-    min-height: 100vh; 
-    display: flex; 
-    flex-direction: column; 
-    position: relative; 
+    .phone { 
+  width: 100%; 
+  max-width: 100%; 
+  margin: 0 auto; 
+  background: #e8eef5; 
+  min-height: 100vh; 
+  display: block; /* Cambiamos flex por block para evitar que intente alinear pantallas ocultas */
+  position: relative;
+} 
   }
   
   /* 2. Limitamos el contenido para que no se estire infinito en pantallas grandes */
@@ -414,11 +415,23 @@
   }
   function saveData(){try{localStorage.setItem('mibotella',JSON.stringify({bottleCap,goal,log,date:new Date().toDateString()}));}catch(e){}}
   function doLogin(){goTo('screenHome');}
-  function goTo(id){
-    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    if(id==='screenKpi') renderKpi();
-    if(id==='screenHome') setTimeout(()=>renderChart('lineSvg','yAxis','xAxis'),50);
+  function goTo(id) {
+  // 1. Oculta todas las pantallas quitando la clase 'active'
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+  });
+  
+  // 2. Muestra solo la pantalla que pediste
+  const target = document.getElementById(id);
+  if (target) {
+    target.classList.add('active');
+    // 3. Scroll hacia arriba para que la nueva pantalla empiece desde el inicio
+    window.scrollTo(0, 0);
+  }
+
+  // Lógica extra para gráficos si es necesario
+  if(id === 'screenKpi') renderKpi();
+  if(id === 'screenHome') setTimeout(() => renderChart('lineSvg','yAxis','xAxis'), 50);
   }
   function openSheet(mode){
     sheetMode=mode||'both';
