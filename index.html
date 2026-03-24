@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#185FA5"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Mi Botella"/>
+  <title>Mi Botella</title>
+  <link rel="manifest" href="manifest.json"/>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    html, body { height:100%; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#e8eef5; }
+    .phone { max-width:430px; margin:0 auto; background:#e8eef5; min-height:100vh; display:flex; flex-direction:column; position:relative; overflow:hidden; }
+    .screen { display:none; flex-direction:column; flex:1; overflow:hidden; }
+    .screen.active { display:flex; }
+
+    .welcome-bg { flex:1; background:#185FA5; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 32px; padding-top:calc(env(safe-area-inset-top,0px) + 40px); }
+    .welcome-logo { width:90px; height:90px; background:rgba(255,255,255,0.15); border-radius:28px; display:flex; align-items:center; justify-content:center; margin-bottom:24px; border:1.5px solid rgba(255,255,255,0.25); }
+    .welcome-appname { font-size:30px; font-weight:700; color:#fff; letter-spacing:-0.5px; margin-bottom:10px; }
+    .welcome-tagline { font-size:15px; color:#B5D4F4; text-align:center; margin-bottom:60px; line-height:1.6; }
+    .welcome-bottom { width:100%; display:flex; flex-direction:column; gap:12px; }
+    .btn-google { width:100%; background:#fff; border:none; border-radius:14px; padding:16px; font-size:15px; font-weight:700; color:#1a2a3a; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; transition:background 0.18s; }
+    .btn-google:hover { background:#e8eef5; }
+    .welcome-terms { font-size:12px; color:#85B7EB; text-align:center; }
+
+    .home-profile-section { background:#185FA5; padding:calc(env(safe-area-inset-top,0px) + 28px) 20px 20px; }
+    .profile-row { display:flex; align-items:center; gap:14px; }
+    .avatar { width:50px; height:50px; border-radius:50%; background:#0C447C; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:2px solid #378ADD; cursor:pointer; transition:opacity 0.15s; }
+    .avatar:hover { opacity:0.85; }
+    .avatar-initials { font-size:17px; font-weight:700; color:#fff; }
+    .profile-name { font-size:18px; font-weight:700; color:#fff; }
+    .profile-sub { font-size:13px; color:#B5D4F4; margin-top:2px; }
+    .hdate-badge { font-size:11px; color:#B5D4F4; background:rgba(255,255,255,0.15); border-radius:20px; padding:5px 11px; flex-shrink:0; }
+
+    .home-nav-section { background:#0C447C; padding:16px 20px 20px; }
+    .nav-section-lbl { font-size:12px; color:#85B7EB; margin-bottom:10px; font-weight:600; }
+    .nav-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .nav-card { background:rgba(255,255,255,0.1); border:0.5px solid rgba(255,255,255,0.2); border-radius:16px; padding:16px 14px; cursor:pointer; transition:background 0.18s, transform 0.1s; }
+    .nav-card:hover { background:rgba(255,255,255,0.2); }
+    .nav-card:active { transform:scale(0.97); }
+    .nav-icon-wrap { width:36px; height:36px; background:rgba(255,255,255,0.12); border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+    .nav-card-label { font-size:14px; font-weight:700; color:#fff; line-height:1.3; }
+    .nav-card-sub { font-size:12px; color:#85B7EB; margin-top:4px; }
+    .home-main { flex:1; padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px); }
+
+    .chart-card { background:#fff; border:1px solid #c8d6e5; border-radius:20px; padding:18px 16px; }
+    .chart-title { font-size:15px; font-weight:700; color:#111; }
+    .chart-sub { font-size:12px; color:#666; margin-bottom:14px; margin-top:3px; }
+    .chart-area { position:relative; height:130px; }
+    .chart-yaxis { position:absolute; left:0; top:0; bottom:20px; display:flex; flex-direction:column; justify-content:space-between; }
+    .chart-ylabel { font-size:10px; color:#999; }
+    .chart-plot { position:absolute; left:32px; right:0; top:0; bottom:20px; }
+    .chart-xaxis { position:absolute; left:32px; right:0; bottom:0; display:flex; justify-content:space-between; }
+    .chart-xlabel { font-size:10px; color:#999; }
+
+    .summary-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .sum-card { background:#fff; border:1px solid #c8d6e5; border-radius:14px; padding:12px 10px; }
+    .sum-val { font-size:20px; font-weight:700; color:#111; }
+    .sum-lbl { font-size:11px; color:#666; margin-top:2px; }
+    .sum-card.blue { background:#1a56a0; border-color:#1a56a0; }
+    .sum-card.blue .sum-val { color:#fff; }
+    .sum-card.blue .sum-lbl { color:#B5D4F4; }
+
+    .inner-header { background:#185FA5; padding:calc(env(safe-area-inset-top,0px) + 24px) 20px 20px; }
+    .back-btn { display:flex; align-items:center; gap:6px; background:none; border:none; color:#B5D4F4; font-size:14px; font-weight:600; cursor:pointer; padding:0; margin-bottom:8px; transition:color 0.15s; }
+    .back-btn:hover { color:#fff; }
+    .inner-title { font-size:22px; font-weight:700; color:#fff; }
+    .inner-sub { font-size:13px; color:#B5D4F4; margin-top:4px; }
+    .inner-main { flex:1; padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px); }
+    .goal-bar-wrap { background:rgba(255,255,255,0.15); border-radius:8px; height:7px; overflow:hidden; margin-top:14px; margin-bottom:5px; }
+    .goal-bar { height:100%; border-radius:8px; background:#85B7EB; transition:width 0.5s ease; }
+    .goal-label { display:flex; justify-content:space-between; font-size:12px; color:#B5D4F4; }
+
+    .profile-screen-header { background:#185FA5; padding:calc(env(safe-area-inset-top,0px) + 28px) 20px 32px; display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .profile-avatar-lg { width:80px; height:80px; border-radius:50%; background:#0C447C; display:flex; align-items:center; justify-content:center; border:3px solid #378ADD; }
+    .profile-screen-name { font-size:22px; font-weight:700; color:#fff; }
+    .profile-screen-email { font-size:14px; color:#B5D4F4; }
+    .profile-main { flex:1; padding:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 16px); }
+
+    .info-card { background:#fff; border:1px solid #c8d6e5; border-radius:20px; overflow:hidden; }
+    .info-card-title { font-size:11px; font-weight:700; color:#555; padding:12px 16px 4px; text-transform:uppercase; letter-spacing:0.5px; }
+    .info-row { display:flex; justify-content:space-between; align-items:center; padding:13px 16px; border-bottom:1px solid #edf2f7; }
+    .info-row:last-child { border-bottom:none; }
+    .info-lbl { font-size:14px; color:#444; font-weight:500; }
+    .info-val { font-size:14px; font-weight:700; color:#111; }
+    .info-val.blue { color:#1a56a0; }
+
+    .config-card { background:#fff; border:1px solid #c8d6e5; border-radius:20px; overflow:hidden; }
+    .config-card-title { font-size:11px; font-weight:700; color:#555; padding:12px 16px 4px; text-transform:uppercase; letter-spacing:0.5px; }
+    .config-row { display:flex; justify-content:space-between; align-items:center; padding:13px 16px; border-bottom:1px solid #edf2f7; }
+    .config-row:last-child { border-bottom:none; }
+    .config-lbl { font-size:14px; color:#333; font-weight:600; }
+    .config-val { font-size:14px; font-weight:700; color:#111; }
+
+    .bottle-card { background:#fff; border:1px solid #c8d6e5; border-radius:20px; padding:20px 16px; }
+    .bottle-ml { font-size:32px; font-weight:700; color:#111; }
+    .bottle-pct { font-size:14px; color:#444; margin-top:3px; font-weight:500; }
+    .fills-num { font-size:34px; font-weight:700; color:#1a56a0; line-height:1; }
+    .fills-lbl { font-size:12px; color:#555; font-weight:500; }
+
+    .log-card { background:#fff; border:1px solid #c8d6e5; border-radius:20px; padding:16px; }
+    .log-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .log-title-lbl { font-size:14px; font-weight:700; color:#111; }
+    .log-list { display:flex; flex-direction:column; gap:8px; max-height:160px; overflow-y:auto; }
+    .log-item { display:flex; align-items:center; gap:8px; font-size:13px; }
+    .log-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .log-dot.full { background:#1a56a0; }
+    .log-dot.half { background:#85B7EB; }
+    .log-amount { font-weight:700; color:#111; min-width:70px; }
+    .log-tag { font-size:11px; color:#1a56a0; background:#E6F1FB; border-radius:6px; padding:2px 7px; font-weight:700; }
+    .log-time { color:#666; margin-left:auto; font-size:12px; }
+    .empty-log { color:#888; font-size:14px; font-weight:500; }
+
+    .btn { border:none; border-radius:10px; padding:14px 16px; font-size:15px; font-weight:700; color:#fff !important; background-color:#1a56a0 !important; cursor:pointer; width:100%; transition:background-color 0.18s, transform 0.1s; }
+    .btn:hover { background-color:#0a3a6e !important; }
+    .btn:active { background-color:#042C53 !important; transform:scale(0.97); }
+    .btn-sm { border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:700; color:#fff !important; background-color:#1a56a0 !important; cursor:pointer; transition:background-color 0.18s; }
+    .btn-sm:hover { background-color:#0a3a6e !important; }
+    .btn-sm:active { background-color:#042C53 !important; }
+    .btn-danger { width:100%; border:none; border-radius:14px; padding:15px; font-size:15px; font-weight:700; color:#fff !important; background-color:#a01a1a !important; cursor:pointer; transition:background-color 0.18s; }
+    .btn-danger:hover { background-color:#6e0a0a !important; }
+
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:flex-end; z-index:20; }
+    .sheet { background:#fff; border-radius:24px 24px 0 0; padding:20px 20px calc(env(safe-area-inset-bottom,0px) + 28px); width:100%; max-width:430px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+    .sheet-handle { width:36px; height:4px; background:#c8d6e5; border-radius:2px; margin:0 auto -4px; }
+    .sheet-title { font-size:18px; font-weight:700; color:#111; }
+    .field-label { font-size:13px; font-weight:600; color:#333; margin-bottom:5px; }
+    .field-input { width:100%; border:2px solid #1a56a0; border-radius:12px; padding:12px; font-size:22px; font-weight:700; background:#fff; color:#111; text-align:center; outline:none; transition:border-color 0.15s; }
+    .field-input:focus { border-color:#0a3a6e; }
+    .presets { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .pill { background-color:#1a56a0 !important; border:none; border-radius:20px; padding:8px 14px; font-size:13px; font-weight:700; color:#fff !important; cursor:pointer; transition:background-color 0.18s; }
+    .pill:hover { background-color:#0a3a6e !important; }
+    .pill:active { background-color:#042C53 !important; }
+    .sheet-cancel { width:100%; background:none; border:none; font-size:14px; font-weight:600; color:#666; cursor:pointer; padding:4px; }
+  </style>
+</head>
+<body>
+<div class="phone">
+  <div class="screen active" id="screenWelcome">
+    <div class="welcome-bg">
+      <div class="welcome-logo">
+        <svg width="52" height="52" viewBox="0 0 80 80" fill="none">
+          <g transform="translate(40,40)">
+            <path d="M -12 -28 L -12 -22 Q -12 -19 -15 -17 Q -22 -13 -23 -6 L -23 18 Q -23 24 -16 26 Q -8 28 0 28 Q 8 28 16 26 Q 23 24 23 18 L 23 -6 Q 22 -13 15 -17 Q 12 -19 12 -22 L 12 -28 Q 12 -30 6 -30 L -6 -30 Q -12 -30 -12 -28 Z" fill="none" stroke="#E6F1FB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M -23 5 Q 0 0 23 5" stroke="#B5D4F4" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <clipPath id="wci"><path d="M -23 5 L -23 18 Q -23 24 -16 26 Q -8 28 0 28 Q 8 28 16 26 Q 23 24 23 18 L 23 5 Z"/></clipPath>
+            <rect x="-23" y="5" width="46" height="23" fill="#378ADD" opacity="0.5" clip-path="url(#wci)"/>
+          </g>
+        </svg>
+      </div>
+      <div class="welcome-appname">Mi Botella</div>
+      <div class="welcome-tagline">Registra tu hidratación diaria y alcanza tus metas de salud</div>
+      <div class="welcome-bottom">
+        <button class="btn-google" onclick="doLogin()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+          Continuar con Google
+        </button>
+        <div class="welcome-terms">Al continuar aceptas los términos de uso</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenHome">
+    <div class="home-profile-section">
+      <div class="profile-row">
+        <div class="avatar" onclick="goTo('screenProfile')"><div class="avatar-initials">JD</div></div>
+        <div style="flex:1">
+          <div class="profile-name">Juan Díaz</div>
+          <div class="profile-sub">Buen día, ¡a hidratarse!</div>
+        </div>
+        <div class="hdate-badge" id="hdate"></div>
+      </div>
+    </div>
+    <div class="home-nav-section">
+      <div class="nav-section-lbl">¿Qué deseas hacer?</div>
+      <div class="nav-cards">
+        <div class="nav-card" onclick="goTo('screenRegister')">
+          <div class="nav-icon-wrap"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C10 2 4 8 4 12C4 15.3 6.7 18 10 18C13.3 18 16 15.3 16 12C16 8 10 2 10 2Z" stroke="#E6F1FB" stroke-width="1.6" fill="none"/><path d="M6.5 12Q8 10 10 12" stroke="#B5D4F4" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg></div>
+          <div class="nav-card-label">Registro de consumo</div>
+          <div class="nav-card-sub">Agregar lo ingerido hoy</div>
+        </div>
+        <div class="nav-card" onclick="goTo('screenKpi')">
+          <div class="nav-icon-wrap"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><polyline points="2,15 6,9 10,11 14,5 18,8" stroke="#E6F1FB" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="6" cy="9" r="1.5" fill="#B5D4F4"/><circle cx="10" cy="11" r="1.5" fill="#B5D4F4"/><circle cx="14" cy="5" r="1.5" fill="#B5D4F4"/></svg></div>
+          <div class="nav-card-label">Seguimiento</div>
+          <div class="nav-card-sub">KPIs y gráfico diario</div>
+        </div>
+      </div>
+    </div>
+    <div class="home-main">
+      <div class="chart-card">
+        <div class="chart-title">Consumo esta semana</div>
+        <div class="chart-sub">Mililitros por día</div>
+        <div class="chart-area">
+          <div class="chart-yaxis" id="yAxis"></div>
+          <div class="chart-plot"><svg id="lineSvg" width="100%" height="100%" style="overflow:visible"></svg></div>
+          <div class="chart-xaxis" id="xAxis"></div>
+        </div>
+      </div>
+      <div class="summary-row">
+        <div class="sum-card blue"><div class="sum-val" id="sumPct">0%</div><div class="sum-lbl">meta hoy</div></div>
+        <div class="sum-card"><div class="sum-val" id="sumMl">0</div><div class="sum-lbl">ml consumidos</div></div>
+        <div class="sum-card"><div class="sum-val" id="sumFalta">—</div><div class="sum-lbl">ml faltan</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenProfile">
+    <div class="profile-screen-header">
+      <button class="back-btn" onclick="goTo('screenHome')" style="align-self:flex-start">← Volver</button>
+      <div class="profile-avatar-lg"><div class="avatar-initials" style="font-size:28px;font-weight:700;color:#fff">JD</div></div>
+      <div class="profile-screen-name">Juan Díaz</div>
+      <div class="profile-screen-email">juan@gmail.com</div>
+    </div>
+    <div class="profile-main">
+      <div class="info-card">
+        <div class="info-card-title">Cuenta</div>
+        <div class="info-row"><span class="info-lbl">Nombre</span><span class="info-val">Juan Díaz</span></div>
+        <div class="info-row"><span class="info-lbl">Correo</span><span class="info-val blue">juan@gmail.com</span></div>
+        <div class="info-row"><span class="info-lbl">Proveedor</span><span class="info-val">Google</span></div>
+        <div class="info-row"><span class="info-lbl">Miembro desde</span><span class="info-val">Mar 2026</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Configuración</div>
+        <div class="info-row"><span class="info-lbl">Capacidad botella</span><span class="info-val" id="infoBottle">— ml</span></div>
+        <div class="info-row"><span class="info-lbl">Meta diaria</span><span class="info-val" id="infoGoal">— ml</span></div>
+        <div class="info-row"><span class="info-lbl">Racha actual</span><span class="info-val blue">3 días 🔥</span></div>
+      </div>
+      <button class="btn-danger" onclick="goTo('screenWelcome')">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screenRegister">
+    <div class="inner-header">
+      <button class="back-btn" onclick="goTo('screenHome')">← Volver</button>
+      <div class="inner-title">Registro de consumo</div>
+      <div class="inner-sub" id="registerSub">Configura tu botella para empezar</div>
+      <div class="goal-bar-wrap"><div class="goal-bar" id="goalBar" style="width:0%"></div></div>
+      <div class="goal-label"><span id="progLabel">0 ml ingeridos</span><span id="goalRight">—</span></div>
+    </div>
+    <div class="inner-main">
+      <div class="config-card">
+        <div class="config-card-title">Configuración</div>
+        <div class="config-row">
+          <span class="config-lbl">Capacidad botella</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="config-val" id="cfgCap">— ml</span>
+            <button class="btn-sm" onclick="openSheet('cap')">Editar</button>
+          </div>
+        </div>
+        <div class="config-row">
+          <span class="config-lbl">Meta diaria</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="config-val" id="cfgGoal">— ml</span>
+            <button class="btn-sm" onclick="openSheet('goal')">Editar</button>
+          </div>
+        </div>
+      </div>
+      <div class="bottle-card">
+        <div style="display:flex;align-items:center;gap:20px">
+          <div style="position:relative;width:80px;height:140px;flex-shrink:0">
+            <svg viewBox="0 0 80 140" width="80" height="140">
+              <rect x="28" y="4" width="24" height="12" rx="4" fill="#B5D4F4"/>
+              <path d="M20 22 Q14 30 14 40 L14 122 Q14 130 20 132 L60 132 Q66 130 66 122 L66 40 Q66 30 60 22 Z" fill="#e8eef5"/>
+              <clipPath id="wc"><path d="M20 22 Q14 30 14 40 L14 122 Q14 130 20 132 L60 132 Q66 130 66 122 L66 40 Q66 30 60 22 Z"/></clipPath>
+              <rect id="waterFill" x="14" y="132" width="52" height="0" fill="#1a56a0" clip-path="url(#wc)" style="transition:all 0.5s ease"/>
+              <path d="M20 22 Q14 30 14 40 L14 122 Q14 130 20 132 L60 132 Q66 130 66 122 L66 40 Q66 30 60 22 Z" fill="none" stroke="#1a56a0" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:12px">
+            <div>
+              <div class="bottle-ml" id="totalMl">0 ml</div>
+              <div class="bottle-pct" id="pctLbl">0% de la meta</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="flex-shrink:0;text-align:center">
+                <div class="fills-num" id="fillsNum">0</div>
+                <div class="fills-lbl">registros</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                <button class="btn" onclick="addFill(1)">+ Botella llena</button>
+                <button class="btn" onclick="addFill(0.5)">+ Media botella</button>
+                <button class="btn" onclick="undoLast()">↩ Deshacer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="log-card">
+        <div class="log-header">
+          <div class="log-title-lbl">Registro de hoy</div>
+          <button class="btn-sm" onclick="clearLog()">Limpiar todo</button>
+        </div>
+        <div class="log-list" id="logList"><div class="empty-log">Aún no has registrado nada.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screenKpi">
+    <div class="inner-header">
+      <button class="back-btn" onclick="goTo('screenHome')">← Volver</button>
+      <div class="inner-title">Seguimiento</div>
+      <div class="inner-sub">Historial y KPIs de hidratación</div>
+    </div>
+    <div class="inner-main">
+      <div class="chart-card">
+        <div class="chart-title">Consumo diario</div>
+        <div class="chart-sub">Últimos 7 días en ml</div>
+        <div class="chart-area">
+          <div class="chart-yaxis" id="yAxis2"></div>
+          <div class="chart-plot"><svg id="lineSvg2" width="100%" height="100%" style="overflow:visible"></svg></div>
+          <div class="chart-xaxis" id="xAxis2"></div>
+        </div>
+      </div>
+      <div class="summary-row">
+        <div class="sum-card blue"><div class="sum-val" id="kpiPct">0%</div><div class="sum-lbl">meta hoy</div></div>
+        <div class="sum-card"><div class="sum-val" id="kpiAvg">0</div><div class="sum-lbl">ml promedio</div></div>
+        <div class="sum-card"><div class="sum-val" id="kpiBest">0</div><div class="sum-lbl">mejor día</div></div>
+      </div>
+      <div class="config-card">
+        <div class="config-card-title">Detalle de la semana</div>
+        <div id="weekDetail"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" style="display:none" onclick="handleOverlay(event)">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title" id="sheetTitle">Configuración</div>
+      <div id="sheetCapField">
+        <div class="field-label">Capacidad de la botella (ml)</div>
+        <input class="field-input" type="number" id="capInput" placeholder="500" inputmode="numeric"/>
+        <div class="presets">
+          <button class="pill" onclick="setPill('cap',350)">350 ml</button>
+          <button class="pill" onclick="setPill('cap',500)">500 ml</button>
+          <button class="pill" onclick="setPill('cap',750)">750 ml</button>
+          <button class="pill" onclick="setPill('cap',1000)">1 L</button>
+          <button class="pill" onclick="setPill('cap',1500)">1.5 L</button>
+          <button class="pill" onclick="setPill('cap',2000)">2 L</button>
+        </div>
+      </div>
+      <div id="sheetGoalField">
+        <div class="field-label">Meta diaria (ml)</div>
+        <input class="field-input" type="number" id="goalInput" placeholder="2000" inputmode="numeric"/>
+        <div class="presets">
+          <button class="pill" onclick="setPill('goal',1500)">1500 ml</button>
+          <button class="pill" onclick="setPill('goal',2000)">2000 ml</button>
+          <button class="pill" onclick="setPill('goal',2500)">2500 ml</button>
+          <button class="pill" onclick="setPill('goal',3000)">3 L</button>
+          <button class="pill" onclick="setPill('goal',3500)">3.5 L</button>
+          <button class="pill" onclick="setPill('goal',4000)">4 L</button>
+        </div>
+      </div>
+      <button class="btn" onclick="saveSheet()">Guardar</button>
+      <button class="sheet-cancel" onclick="closeSheet()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let bottleCap=0,goal=0,log=[],sheetMode='both';
+  const weekData=[1400,1800,2100,900,1750,2000,0];
+  const days=['Lun','Mar','Mié','Jue','Vie','Sáb','Hoy'];
+
+  function loadData(){
+    try{
+      const saved=localStorage.getItem('mibotella');
+      if(saved){const d=JSON.parse(saved);bottleCap=d.bottleCap||0;goal=d.goal||0;const today=new Date().toDateString();log=(d.date===today)?(d.log||[]):[];}
+    }catch(e){}
+  }
+  function saveData(){try{localStorage.setItem('mibotella',JSON.stringify({bottleCap,goal,log,date:new Date().toDateString()}));}catch(e){}}
+  function doLogin(){goTo('screenHome');}
+  function goTo(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if(id==='screenKpi') renderKpi();
+    if(id==='screenHome') setTimeout(()=>renderChart('lineSvg','yAxis','xAxis'),50);
+  }
+  function openSheet(mode){
+    sheetMode=mode||'both';
+    document.getElementById('sheetCapField').style.display=mode==='goal'?'none':'block';
+    document.getElementById('sheetGoalField').style.display=mode==='cap'?'none':'block';
+    document.getElementById('sheetTitle').textContent=mode==='cap'?'Capacidad de botella':mode==='goal'?'Meta diaria':'Configuración';
+    document.getElementById('capInput').value=bottleCap||'';
+    document.getElementById('goalInput').value=goal||'';
+    document.getElementById('overlay').style.display='flex';
+  }
+  function closeSheet(){document.getElementById('overlay').style.display='none';}
+  function handleOverlay(e){closeSheet();}
+  function setPill(t,v){document.getElementById(t==='cap'?'capInput':'goalInput').value=v;}
+  function saveSheet(){
+    const c=parseInt(document.getElementById('capInput').value);
+    const g=parseInt(document.getElementById('goalInput').value);
+    if(sheetMode!=='goal'&&(!c||c<50)){document.getElementById('capInput').focus();return;}
+    if(sheetMode!=='cap'&&(!g||g<100)){document.getElementById('goalInput').focus();return;}
+    if(sheetMode!=='goal') bottleCap=c;
+    if(sheetMode!=='cap') goal=g;
+    closeSheet();saveData();updateAll();
+  }
+  function totalMl(){return log.reduce((s,e)=>s+e.ml,0);}
+  function addFill(f){
+    if(!bottleCap){openSheet('cap');return;}
+    if(!goal){openSheet('goal');return;}
+    const ml=Math.round(bottleCap*f);
+    const now=new Date();
+    log.push({ml,fraction:f,time:now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})});
+    saveData();updateAll();
+  }
+  function undoLast(){if(log.length){log.pop();saveData();updateAll();}}
+  function clearLog(){log=[];saveData();updateAll();}
+  function updateAll(){
+    const total=totalMl();const pct=goal?Math.min(total/goal,1):0;weekData[6]=total;
+    document.getElementById('registerSub').textContent=bottleCap&&goal?`Botella: ${bottleCap} ml · Meta: ${goal} ml`:'Configura tu botella para empezar';
+    document.getElementById('cfgCap').textContent=bottleCap?bottleCap+' ml':'— ml';
+    document.getElementById('cfgGoal').textContent=goal?goal+' ml':'— ml';
+    document.getElementById('goalBar').style.width=Math.round(pct*100)+'%';
+    document.getElementById('progLabel').textContent=Math.round(total)+' ml ingeridos';
+    document.getElementById('goalRight').textContent=goal?'Meta: '+goal+' ml':'—';
+    document.getElementById('totalMl').textContent=Math.round(total)+' ml';
+    document.getElementById('pctLbl').textContent=goal?Math.round(pct*100)+'% de la meta':'Configura tu meta';
+    document.getElementById('fillsNum').textContent=log.length;
+    const wh=Math.round(pct*110);
+    document.getElementById('waterFill').setAttribute('y',132-wh);
+    document.getElementById('waterFill').setAttribute('height',wh);
+    document.getElementById('sumPct').textContent=Math.round(pct*100)+'%';
+    document.getElementById('sumMl').textContent=Math.round(total);
+    document.getElementById('sumFalta').textContent=goal?Math.max(goal-Math.round(total),0):'—';
+    document.getElementById('infoBottle').textContent=bottleCap?bottleCap+' ml':'— ml';
+    document.getElementById('infoGoal').textContent=goal?goal+' ml':'— ml';
+    const list=document.getElementById('logList');
+    if(!log.length){list.innerHTML='<div class="empty-log">Aún no has registrado nada.</div>';}
+    else{list.innerHTML='';[...log].reverse().forEach(e=>{const row=document.createElement('div');row.className='log-item';row.innerHTML=`<div class="log-dot ${e.fraction===1?'full':'half'}"></div><div class="log-amount">${Math.round(e.ml)} ml</div><div class="log-tag">${e.fraction===1?'llena':'media'}</div><div class="log-time">${e.time}</div>`;list.appendChild(row);});}
+    renderChart('lineSvg','yAxis','xAxis');
+  }
+  function renderChart(svgId,yId,xId){
+    const svg=document.getElementById(svgId);if(!svg) return;
+    const w=svg.parentElement.offsetWidth||260;const h=svg.parentElement.offsetHeight||100;
+    const max=Math.max(...weekData,goal||1,100);
+    const pts=weekData.map((v,i)=>({x:(i/(weekData.length-1))*w,y:h-(v/max)*h,v}));
+    const path=pts.map((p,i)=>(i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`)).join(' ');
+    const area=pts.map((p,i)=>(i===0?`M${p.x},${h} L${p.x},${p.y}`:`L${p.x},${p.y}`)).join(' ')+` L${pts[pts.length-1].x},${h} Z`;
+    const goalY=h-((goal||0)/max)*h;
+    svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+    svg.innerHTML=`<defs><linearGradient id="ag${svgId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a56a0" stop-opacity="0.15"/><stop offset="100%" stop-color="#1a56a0" stop-opacity="0"/></linearGradient></defs>${goal?`<line x1="0" y1="${goalY}" x2="${w}" y2="${goalY}" stroke="#B5D4F4" stroke-width="1" stroke-dasharray="4,3"/>`:''}<path d="${area}" fill="url(#ag${svgId})"/><path d="${path}" fill="none" stroke="#1a56a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${pts.map((p,i)=>`<circle cx="${p.x}" cy="${p.y}" r="${i===6?5:3.5}" fill="${i===6?'#1a56a0':'#fff'}" stroke="#1a56a0" stroke-width="1.5"/><text x="${p.x}" y="${p.y-8}" text-anchor="middle" font-size="9" fill="#1a56a0" font-family="-apple-system,sans-serif">${p.v>0?Math.round(p.v):''}</text>`).join('')}`;
+    const yEl=document.getElementById(yId);if(yEl) yEl.innerHTML=[max,Math.round(max/2),0].map(v=>`<span class="chart-ylabel">${v}</span>`).join('');
+    const xEl=document.getElementById(xId);if(xEl) xEl.innerHTML=days.map(d=>`<span class="chart-xlabel">${d}</span>`).join('');
+  }
+  function renderKpi(){
+    const total=totalMl();const pct=goal?Math.min(total/goal,1):0;
+    const avg=Math.round(weekData.slice(0,6).reduce((a,b)=>a+b,0)/6);const best=Math.max(...weekData);
+    document.getElementById('kpiPct').textContent=Math.round(pct*100)+'%';
+    document.getElementById('kpiAvg').textContent=avg;
+    document.getElementById('kpiBest').textContent=best;
+    setTimeout(()=>renderChart('lineSvg2','yAxis2','xAxis2'),50);
+    const detail=document.getElementById('weekDetail');detail.innerHTML='';
+    weekData.forEach((v,i)=>{const pd=goal?Math.min(v/goal,1):0;const row=document.createElement('div');row.className='config-row';row.innerHTML=`<span class="config-lbl">${days[i]}</span><div style="display:flex;align-items:center;gap:8px"><div style="width:60px;height:5px;background:#e8eef5;border-radius:3px;overflow:hidden"><div style="width:${Math.round(pd*100)}%;height:100%;background:#1a56a0;border-radius:3px"></div></div><span style="font-size:14px;font-weight:700;color:#111;">${Math.round(v)} ml</span></div>`;detail.appendChild(row);});
+  }
+  document.getElementById('hdate').textContent=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+  loadData();updateAll();
+</script>
+</body>
+</html>

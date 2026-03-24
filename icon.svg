@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="128" fill="#185FA5"/>
+  <g transform="translate(256, 256)">
+    <path d="M -38 -198 L -38 -172 Q -38 -160 -51 -153 Q -83 -134 -89 -96 L -89 102 Q -89 147 -51 159 Q -13 172 0 172 Q 13 172 51 159 Q 89 147 89 102 L 89 -96 Q 83 -134 51 -153 Q 38 -160 38 -172 L 38 -198 Q 38 -211 19 -211 L -19 -211 Q -38 -211 -38 -198 Z" fill="none" stroke="#E6F1FB" stroke-width="14" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M -89 32 Q 0 12 89 32" stroke="#B5D4F4" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M -86 64 Q 0 44 86 64" stroke="#B5D4F4" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.5"/>
+    <clipPath id="wfill"><path d="M -89 32 L -89 102 Q -89 147 -51 159 Q -13 172 0 172 Q 13 172 51 159 Q 89 147 89 102 L 89 32 Z"/></clipPath>
+    <rect x="-89" y="32" width="178" height="140" fill="#B5D4F4" opacity="0.3" clip-path="url(#wfill)"/>
+  </g>
+</svg>
